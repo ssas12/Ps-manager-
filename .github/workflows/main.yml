@@ -5,23 +5,37 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'PSShopAndroidStarter.zip'
+      - 'PSShop_Arabic_Starter.zip'
       - '.github/workflows/main.yml'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Check project files
+      - name: Extract project
         run: |
-          ls -la
-          echo "Checking uploaded project archive"
-          find . -maxdepth 2 -type f
+          sudo apt-get update
+          sudo apt-get install -y unzip
+          unzip -q PSShop_Arabic_Starter.zip -d project
 
       - name: Build APK
         run: |
-          echo "The project ZIP must be extracted before Gradle can build it."
-          exit 1
+          WRAPPER=$(find project -type f -name gradlew -print -quit)
+          if [ -z "$WRAPPER" ]; then
+            echo "Gradle wrapper not found in ZIP"
+            exit 1
+          fi
+          DIR=$(dirname "$WRAPPER")
+          cd "$DIR"
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: PS-Shop-APK
+          path: project/**/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
