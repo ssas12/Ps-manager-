@@ -1,0 +1,27 @@
+
+name: Build PS Shop APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'PSShopAndroidStarter.zip'
+      - '.github/workflows/main.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check project files
+        run: |
+          ls -la
+          echo "Checking uploaded project archive"
+          find . -maxdepth 2 -type f
+
+      - name: Build APK
+        run: |
+          echo "The project ZIP must be extracted before Gradle can build it."
+          exit 1
